@@ -1,0 +1,1 @@
+SHIBBOLETH_CONFIG = YAML.load_file(File.join(Rails.root, 'config','shibboleth.yml'))['config']

@@ -1,0 +1,10 @@
+config:
+  attributes:
+    emplid: employeeNumber
+    email: eppn
+    affiliations: affiliation
+
+  extra_attributes:
+    first_name: givenName
+    last_name: sn
+    email: mail
