@@ -12,14 +12,12 @@ module Shibboleth::Rails
        :name_n       => env_config_attribute('email').chomp("@osu.edu"),
        :affiliations => env_config_attribute('affiliations')}
       SHIBBOLETH_CONFIG['extra_attributes'].each do |name, value|
-        logger.debug "#{name} : #{value}"
         shib[name.to_sym] = env_attribute(value)
       end
       return shib
     end
 
     def current_user
-      logger.debug shibboleth
       return @current_user if defined?(@current_user)
       @current_user = if session[:simulate_id].present?
                         User.find(session[:simulate_id])
@@ -68,7 +66,6 @@ module Shibboleth::Rails
 
     def env_config_attribute(name)
       attr = SHIBBOLETH_CONFIG['attributes'][name]
-      logger.debug attr
       env_attribute(attr)
     end
 
