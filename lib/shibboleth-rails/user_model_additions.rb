@@ -13,7 +13,13 @@ module Shibboleth::Rails
         user = find_by_name_n(identity[:name_n])
       
         if user
-          user.update_attribute(:emplid, identity)
+          user.update_attribute(:emplid, identity[:emplid])
+        end
+
+        identity.each do |key, value|
+          if user.respond_to?(key) and user.send(key).nil?
+            user.update_attribute(key.to_sym, value)
+          end
         end
 
         user = find_or_create_by_emplid(identity)
