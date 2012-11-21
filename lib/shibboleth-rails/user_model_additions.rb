@@ -10,10 +10,12 @@ module Shibboleth::Rails
       def find_or_create_from_shibboleth(identity)
         affiliations = identity.delete(:affiliations)
 
-        user = find_by_name_n(identity[:name_n])
-      
-        if user
-          user.update_attribute(:emplid, identity[:emplid])
+        user = find_by_emplid(identity[:emplid])
+        unless user do
+          user = find_by_name_n(identity[:name_n]) unless user
+          if user
+            user.update_attribute(:emplid, identity[:emplid])
+          end
         end
 
         identity.each do |key, value|
