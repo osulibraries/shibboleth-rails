@@ -11,7 +11,7 @@ module Shibboleth::Rails
         affiliations = identity.delete(:affiliations)
 
         user = find_by_emplid(identity[:emplid])
-        unless user do
+        unless user
           user = find_by_name_n(identity[:name_n]) unless user
           if user
             user.update_attribute(:emplid, identity[:emplid])
