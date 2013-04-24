@@ -12,11 +12,14 @@ module Shibboleth::Rails
 
         user = find_by_emplid(identity[:emplid])
         unless user
-          user = find_by_name_n(identity[:name_n]) unless user
+          user = find_by_name_n(identity[:name_n])
           if user
             user.update_attribute(:emplid, identity[:emplid])
+            user.save
+            user = find_or_create_by_emplid(identity)
           end
         end
+
 
         identity.each do |key, value|
           if user.respond_to?(key) and user.send(key).nil?
@@ -24,12 +27,10 @@ module Shibboleth::Rails
           end
         end
 
-        user = find_or_create_by_emplid(identity)
-
         # names change due to marriage, etc.
         # update_attribute is a NOOP if not different
-        user.update_attribute(:name_n, identity[:name_n])
-        user.update_role(affiliations) if user.respond_to?(:update_role)
+        # user.update_attribute(:name_n, identity[:name_n])
+        # user.update_role(affiliations) if user.respond_to?(:update_role)
         user
       end
     end
