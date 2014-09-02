@@ -4,32 +4,36 @@ module Shibboleth::Rails
     private
 
     def authenticated?
-      env_config_attribute('emplid').present?
+      request.env['employeeNumber'].present?
     end
 
     def shibboleth
-      shib = {:emplid       => env_config_attribute('emplid'),
-       :name_n       => env_config_attribute('email').chomp("@osu.edu"),
-       :affiliations => env_config_attribute('affiliations')}
-      SHIBBOLETH_CONFIG['extra_attributes'].each do |name, value|
-        shib[name.to_sym] = env_attribute(value)
-      end
-      return shib
+      {
+        :emplid       => request.env['employeeNumber'],
+        :name_n       => request.env['REMOTE_USER'].chomp("@osu.edu"),
+        :affiliations => request.env['affiliation'],
+        :first_name   => request.env['FIRST-NAME'] || request.env['givenName'],
+        :last_name    => request.env['LAST-NAME'] || request.env['sn'],
+      }
     end
 
     def current_user
-      return @current_user if defined?(@current_user)
-      @current_user = if session[:simulate_id].present?
-                        User.find(session[:simulate_id])
-                      elsif authenticated?
-                        User.find_or_create_from_shibboleth(shibboleth)
-                      end
+      @current_user ||= begin
+        if session[:simulate_id].present?
+          User.find(session[:simulate_id])
+        elsif authenticated?
+          User.find_or_create_from_shibboleth(shibboleth)
+        elsif request.xhr?
+          User.where(id: session[:user_id]).first
+        end
+      end
     end
 
     def require_shibboleth
       if current_user
         current_user.update_usage_stats(request, :login => session['new'])
         session.delete('new')
+        session[:user_id] = current_user.id
       else
         session['new'] = true
         session.delete(:simulate_id)
@@ -42,9 +46,7 @@ module Shibboleth::Rails
     end
 
     def requested_url
-      if request.xhr?
-        url_for :controller => 'root', :action => 'show', :xhr => 'true'
-      elsif request.respond_to?(:url)
+      if request.respond_to? :url
         request.url
       else
         request.protocol + request.host + request.request_uri
@@ -56,17 +58,9 @@ module Shibboleth::Rails
         [request.protocol, request.host, '/Shibboleth.sso/Login?target=', CGI.escape(requested_url)].join
       else
         session['target'] = requested_url
+        Rails.logger.debug("Environment: #{Rails.env}")
         new_user_session_url
       end
-    end
-
-    def env_attribute(attr)
-      request.env[attr] || request.env['HTTP_'+attr.upcase]
-    end
-
-    def env_config_attribute(name)
-      attr = SHIBBOLETH_CONFIG['attributes'][name]
-      env_attribute(attr)
     end
 
   end
