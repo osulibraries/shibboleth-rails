@@ -69,7 +69,7 @@ module Shibboleth::Rails
       env_attribute(attr)
     end
 
-  endw
+  end
 
 end
 
