@@ -1,10 +1,9 @@
 config:
   attributes:
-    emplid: employeeNumber
-    email: eppn
-    affiliations: affiliation
+    email: HTTP_EMAIL
+    affiliations: HTTP_AFFILIATION
 
   extra_attributes:
-    first_name: givenName
-    last_name: sn
-    email: mail
+    first_name: HTTP_FIRST_NAME
+    last_name: HTTP_LAST_NAME
+    email: HTTP_EMAIL

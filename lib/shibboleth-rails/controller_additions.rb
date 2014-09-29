@@ -4,11 +4,11 @@ module Shibboleth::Rails
     private
 
     def authenticated?
-      env_config_attribute('emplid').present?
+      env_config_attribute('email').present?
     end
 
     def shibboleth
-      shib = {:emplid       => env_config_attribute('emplid'),
+      shib = {:email       => env_config_attribute('email'),
        :name_n       => env_config_attribute('email').chomp("@osu.edu"),
        :affiliations => env_config_attribute('affiliations')}
       SHIBBOLETH_CONFIG['extra_attributes'].each do |name, value|
@@ -69,7 +69,7 @@ module Shibboleth::Rails
       env_attribute(attr)
     end
 
-  end
+  endw
 
 end
 
